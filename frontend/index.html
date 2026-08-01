@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JARVIS</title>
+<style>
+  :root {
+    --bg: #000000;
+    --panel: #0a0a0a;
+    --sky: #3FC1FF;
+    --yellow: #FFD447;
+    --text: #E8ECF1;
+    --dim: #5A6472;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Consolas", "Courier New", monospace;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 30px;
+    border-bottom: 1px solid rgba(63, 193, 255, 0.25);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--sky);
+  }
+
+  .topbar .brand {
+    color: var(--yellow);
+    font-weight: bold;
+    letter-spacing: 6px;
+    font-size: 16px;
+    text-shadow: 0 0 10px rgba(255, 212, 71, 0.5);
+  }
+
+  .topbar .clock { color: var(--dim); }
+
+  .main {
+    display: grid;
+    grid-template-columns: 240px 1fr 260px;
+    height: calc(100vh - 46px);
+    padding: 16px 24px;
+    gap: 16px;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .panel {
+    border: 1px solid rgba(63, 193, 255, 0.2);
+    background: var(--panel);
+    border-radius: 2px;
+    padding: 14px;
+    position: relative;
+  }
+
+  .panel-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--yellow);
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 212, 71, 0.2);
+    padding-bottom: 6px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+
+  .stat-row span:last-child { color: var(--sky); }
+
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .ring-wrap { position: relative; width: 220px; height: 220px; }
+
+  .ring {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(63, 193, 255, 0.15);
+  }
+
+  .ring.r1 {
+    animation: spin 12s linear infinite;
+    border-top-color: var(--sky);
+    border-right-color: var(--sky);
+  }
+
+  .ring.r2 {
+    top: 18px; left: 18px;
+    width: calc(100% - 36px);
+    height: calc(100% - 36px);
+    animation: spin-rev 8s linear infinite;
+    border-bottom-color: var(--yellow);
+    border-left-color: var(--yellow);
+  }
+
+  .core {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(63,193,255,0.25) 0%, transparent 70%);
+    border: 1px solid var(--sky);
+    box-shadow: 0 0 25px rgba(63, 193, 255, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+    z-index: 2;
+  }
+
+  .speak-wave {
+    position: absolute; top: 50%; left: 50%;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 1px solid var(--yellow);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ring-wrap.speaking .speak-wave {
+    animation: wave-out 1.4s ease-out infinite;
+  }
+
+  .ring-wrap.speaking .speak-wave:nth-child(5) { animation-delay: 0s; }
+  .ring-wrap.speaking .speak-wave:nth-child(6) { animation-delay: 0.45s; }
+  .ring-wrap.speaking .speak-wave:nth-child(7) { animation-delay: 0.9s; }
+
+  @keyframes wave-out {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; border-color: var(--yellow); }
+    100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; border-color: var(--yellow); }
+  }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(63, 193, 255, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(63, 193, 255, 0.9); }
+  }
+
+  .status-text {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--sky);
+    text-shadow: 0 0 8px rgba(63, 193, 255, 0.6);
+  }
+
+  .wave-canvas { display: block; width: 100%; height: 90px; }
+
+  .transcript { max-height: 220px; overflow-y: auto; font-size: 11px; line-height: 1.8; }
+  .transcript .you::before { content: "> "; color: var(--dim); }
+  .transcript .you { color: var(--dim); margin-bottom: 3px; }
+  .transcript .jarvis::before { content: "> "; color: var(--yellow); }
+  .transcript .jarvis { color: var(--sky); margin-bottom: 10px; }
+
+  .radar-canvas { display: block; width: 100%; height: 140px; }
+
+  .loc-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 6px; color: var(--dim); }
+  .loc-row span:last-child { color: var(--sky); }
+
+  .ticker-wrap { max-height: 110px; overflow: hidden; }
+  .ticker-item {
+    display: flex; justify-content: space-between;
+    font-size: 11px; padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .ticker-item .up { color: #4AFF8C; }
+  .ticker-item .down { color: #FF5C5C; }
+  .ticker-item .sym { color: var(--yellow); }
+
+  .news-item {
+    font-size: 10.5px;
+    color: var(--dim);
+    margin-bottom: 10px;
+    line-height: 1.5;
+    border-left: 2px solid var(--sky);
+    padding-left: 8px;
+  }
+
+  .mock-tag {
+    position: absolute; top: 6px; right: 8px;
+    font-size: 8px; letter-spacing: 1px;
+    color: var(--dim); border: 1px solid var(--dim);
+    padding: 1px 4px; border-radius: 2px;
+  }
+
+  .demo-btn {
+    background: transparent;
+    border: 1px solid var(--sky);
+    color: var(--sky);
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .demo-btn:hover { background: rgba(63,193,255,0.1); }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">JARVIS</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+
+  <div class="main">
+
+    <div class="col">
+      <div class="panel">
+        <div class="panel-title">SYSTEM</div>
+        <div class="stat-row"><span>STATUS</span><span>ONLINE</span></div>
+        <div class="stat-row"><span>MODE</span><span>VOICE</span></div>
+        <div class="stat-row"><span>LATENCY</span><span id="latency">142ms</span></div>
+        <div class="stat-row"><span>TASKS</span><span>3 ACTIVE</span></div>
+        <div class="stat-row"><span>UPTIME</span><span id="uptime">00:00:00</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">WEATHER</div>
+        <div class="mock-tag">MOCK</div>
+        <div class="stat-row"><span>LAHORE</span><span>32°C</span></div>
+        <div class="stat-row"><span>CONDITION</span><span>CLEAR</span></div>
+        <div class="stat-row"><span>HUMIDITY</span><span>41%</span></div>
+        <div class="stat-row"><span>WIND</span><span>9 km/h</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">NEWS</div>
+        <div class="mock-tag">MOCK</div>
+        <div class="news-item">Local tech sector sees rise in software exports this quarter.</div>
+        <div class="news-item">New AI model release sparks discussion among developers.</div>
+        <div class="news-item">Weather authority issues heatwave advisory for the region.</div>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="ring-wrap" id="ringWrap">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="speak-wave"></div>
+        <div class="speak-wave"></div>
+        <div class="speak-wave"></div>
+        <div class="core"></div>
+      </div>
+      <div class="status-text" id="statusText">LISTENING</div>
+      <canvas class="wave-canvas" id="wave"></canvas>
+      <button class="demo-btn" id="demoSpeak">SIMULATE SPEAKING</button>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <div class="panel-title">RADAR</div>
+        <canvas class="radar-canvas" id="radar"></canvas>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">LOCATION</div>
+        <div class="mock-tag">MOCK</div>
+        <div class="loc-row"><span>IP</span><span>203.101.44.12</span></div>
+        <div class="loc-row"><span>CITY</span><span>Lahore, PK</span></div>
+        <div class="loc-row"><span>LAT/LON</span><span>31.5497, 74.3436</span></div>
+        <div class="loc-row"><span>ALT</span><span>217m</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">MARKETS</div>
+        <div class="mock-tag">MOCK</div>
+        <div class="ticker-wrap" id="ticker-wrap"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">TRANSCRIPT</div>
+        <div class="transcript">
+          <div class="you">what time is it</div>
+          <div class="jarvis">The time is 3:45 PM</div>
+          <div class="you">open youtube</div>
+          <div class="jarvis">Opening YouTube</div>
+          <div class="you">weather in lahore</div>
+          <div class="jarvis">32 degrees, clear sky</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  function updateClock() {
+    document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  const startTime = Date.now();
+  function updateUptime() {
+    const diff = Math.floor((Date.now() - startTime) / 1000);
+    const h = String(Math.floor(diff / 3600)).padStart(2, "0");
+    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+    const s = String(diff % 60).padStart(2, "0");
+    document.getElementById("uptime").textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateUptime, 1000);
+
+  setInterval(() => {
+    document.getElementById("latency").textContent = (100 + Math.floor(Math.random() * 80)) + "ms";
+  }, 2000);
+
+  function setSpeaking(isSpeaking) {
+    const ringWrap = document.getElementById("ringWrap");
+    const statusText = document.getElementById("statusText");
+    if (isSpeaking) {
+      ringWrap.classList.add("speaking");
+      statusText.textContent = "SPEAKING";
+    } else {
+      ringWrap.classList.remove("speaking");
+      statusText.textContent = "LISTENING";
+    }
+  }
+
+  document.getElementById("demoSpeak").addEventListener("click", () => {
+    setSpeaking(true);
+    setTimeout(() => setSpeaking(false), 3000);
+  });
+
+  function resizeCanvas(canvas) {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+
+  const radarCanvas = document.getElementById("radar");
+  const radarCtx = radarCanvas.getContext("2d");
+  let sweepAngle = 0;
+
+  function drawRadar() {
+    resizeCanvas(radarCanvas);
+    const w = radarCanvas.width, h = radarCanvas.height;
+    const cx = w / 2, cy = h / 2;
+    const r = Math.min(w, h) / 2 - 4;
+
+    radarCtx.clearRect(0, 0, w, h);
+    radarCtx.strokeStyle = "rgba(63,193,255,0.25)";
+    radarCtx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+      radarCtx.beginPath();
+      radarCtx.arc(cx, cy, (r / 3) * i, 0, Math.PI * 2);
+      radarCtx.stroke();
+    }
+    radarCtx.beginPath();
+    radarCtx.moveTo(cx - r, cy); radarCtx.lineTo(cx + r, cy);
+    radarCtx.moveTo(cx, cy - r); radarCtx.lineTo(cx, cy + r);
+    radarCtx.stroke();
+
+    const grad = radarCtx.createConicGradient(sweepAngle - Math.PI / 2, cx, cy);
+    grad.addColorStop(0, "rgba(63,193,255,0.5)");
+    grad.addColorStop(0.08, "rgba(63,193,255,0)");
+    grad.addColorStop(1, "rgba(63,193,255,0)");
+    radarCtx.fillStyle = grad;
+    radarCtx.beginPath();
+    radarCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    radarCtx.fill();
+
+    radarCtx.strokeStyle = "#FFD447";
+    radarCtx.beginPath();
+    radarCtx.moveTo(cx, cy);
+    radarCtx.lineTo(cx + r * Math.cos(sweepAngle), cy + r * Math.sin(sweepAngle));
+    radarCtx.stroke();
+
+    sweepAngle += 0.03;
+    requestAnimationFrame(drawRadar);
+  }
+  drawRadar();
+
+  const waveCanvas = document.getElementById("wave");
+  const waveCtx = waveCanvas.getContext("2d");
+
+  function drawIdleWave() {
+    resizeCanvas(waveCanvas);
+    const w = waveCanvas.width, h = waveCanvas.height;
+    waveCtx.clearRect(0, 0, w, h);
+    waveCtx.strokeStyle = "rgba(63,193,255,0.3)";
+    waveCtx.beginPath();
+    waveCtx.moveTo(0, h / 2);
+    waveCtx.lineTo(w, h / 2);
+    waveCtx.stroke();
+  }
+  drawIdleWave();
+
+  async function setupMicWaveform() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      let clapCooldown = false;
+
+      function checkForClap() {
+        let peak = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = Math.abs(dataArray[i] - 128);
+          if (v > peak) peak = v;
+        }
+        if (peak > 100 && !clapCooldown) {
+          clapCooldown = true;
+          onClapDetected();
+          setTimeout(() => { clapCooldown = false; }, 800);
+        }
+      }
+
+      function onClapDetected() {
+        const statusText = document.getElementById("statusText");
+        statusText.textContent = "CLAP DETECTED";
+        setTimeout(() => { statusText.textContent = "LISTENING"; }, 1200);
+      }
+
+      function renderWave() {
+        resizeCanvas(waveCanvas);
+        analyser.getByteTimeDomainData(dataArray);
+        checkForClap();
+        const w = waveCanvas.width, h = waveCanvas.height;
+        waveCtx.clearRect(0, 0, w, h);
+        waveCtx.lineWidth = 2;
+        waveCtx.strokeStyle = "#3FC1FF";
+        waveCtx.shadowColor = "#3FC1FF";
+        waveCtx.shadowBlur = 8;
+        waveCtx.beginPath();
+        const sliceWidth = w / bufferLength;
+        let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * h) / 2;
+          if (i === 0) waveCtx.moveTo(x, y);
+          else waveCtx.lineTo(x, y);
+          x += sliceWidth;
+        }
+        waveCtx.stroke();
+        requestAnimationFrame(renderWave);
+      }
+      renderWave();
+    } catch (err) {
+      console.log("Mic access not granted, showing idle waveform:", err);
+    }
+  }
+  setupMicWaveform();
+
+  const stocks = [
+    { sym: "AAPL", price: 227.4, dir: "up" },
+    { sym: "TSLA", price: 251.8, dir: "down" },
+    { sym: "MSFT", price: 418.2, dir: "up" },
+    { sym: "NVDA", price: 132.6, dir: "up" },
+    { sym: "GOOGL", price: 178.9, dir: "down" },
+  ];
+
+  function renderStocks() {
+    const wrap = document.getElementById("ticker-wrap");
+    wrap.innerHTML = "";
+    stocks.forEach(s => {
+      s.price += (Math.random() - 0.5) * 1.2;
+      s.dir = Math.random() > 0.5 ? "up" : "down";
+      const row = document.createElement("div");
+      row.className = "ticker-item";
+      row.innerHTML = `<span class="sym">${s.sym}</span><span class="${s.dir}">$${s.price.toFixed(2)} ${s.dir === "up" ? "▲" : "▼"}</span>`;
+      wrap.appendChild(row);
+    });
+  }
+  renderStocks();
+  setInterval(renderStocks, 3000);
+</script>
+
+</body>
+</html>
