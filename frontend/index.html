@@ -269,7 +269,7 @@
       </div>
       <div class="status-text" id="statusText">LISTENING</div>
       <canvas class="wave-canvas" id="wave"></canvas>
-      <button class="demo-btn" id="demoSpeak">SIMULATE SPEAKING</button>
+      <button class="demo-btn" id="listenBtn">TAP TO SPEAK</button>
     </div>
 
     <div class="col">
@@ -295,14 +295,7 @@
 
       <div class="panel">
         <div class="panel-title">TRANSCRIPT</div>
-        <div class="transcript">
-          <div class="you">what time is it</div>
-          <div class="jarvis">The time is 3:45 PM</div>
-          <div class="you">open youtube</div>
-          <div class="jarvis">Opening YouTube</div>
-          <div class="you">weather in lahore</div>
-          <div class="jarvis">32 degrees, clear sky</div>
-        </div>
+        <div class="transcript" id="transcript"></div>
       </div>
     </div>
 
@@ -341,9 +334,8 @@
     }
   }
 
-  document.getElementById("demoSpeak").addEventListener("click", () => {
-    setSpeaking(true);
-    setTimeout(() => setSpeaking(false), 3000);
+  document.getElementById("listenBtn").addEventListener("click", () => {
+    startListening();
   });
 
   function resizeCanvas(canvas) {
@@ -436,9 +428,9 @@
       }
 
       function onClapDetected() {
-        const statusText = document.getElementById("statusText");
+        if (isListening) return;
         statusText.textContent = "CLAP DETECTED";
-        setTimeout(() => { statusText.textContent = "LISTENING"; }, 1200);
+        setTimeout(() => { startListening(); }, 400);
       }
 
       function renderWave() {
@@ -470,6 +462,97 @@
     }
   }
   setupMicWaveform();
+
+  const BACKEND_URL = "http://localhost:5000/api/command";
+  const statusText = document.getElementById("statusText");
+  const transcriptEl = document.getElementById("transcript");
+
+  function addToTranscript(who, text) {
+    const line = document.createElement("div");
+    line.className = who;
+    line.textContent = text;
+    transcriptEl.appendChild(line);
+    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+  }
+
+  async function sendCommandToBackend(commandText) {
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: commandText })
+      });
+      const data = await res.json();
+
+      addToTranscript("jarvis", data.response);
+      speakResponse(data.response);
+
+      if (data.action === "open_url" && data.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err) {
+      const msg = "I could not reach the backend";
+      addToTranscript("jarvis", msg);
+      speakResponse(msg);
+      console.log("Backend error:", err);
+    }
+  }
+
+  function speakResponse(text) {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  let recognition = null;
+  let isListening = false;
+
+  function setupSpeechRecognition() {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+      statusText.textContent = "SPEECH NOT SUPPORTED";
+      console.log("This browser does not support the Web Speech API.");
+      return;
+    }
+
+    recognition = new SpeechRecognitionAPI();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      isListening = true;
+      statusText.textContent = "LISTENING";
+    };
+
+    recognition.onresult = (event) => {
+      const said = event.results[0][0].transcript;
+      addToTranscript("you", said);
+      sendCommandToBackend(said);
+    };
+
+    recognition.onerror = (event) => {
+      console.log("Recognition error:", event.error);
+      statusText.textContent = "IDLE";
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      if (statusText.textContent === "LISTENING") {
+        statusText.textContent = "IDLE";
+      }
+    };
+  }
+
+  function startListening() {
+    if (recognition && !isListening) {
+      recognition.start();
+    }
+  }
+
+  setupSpeechRecognition();
 
   const stocks = [
     { sym: "AAPL", price: 227.4, dir: "up" },
