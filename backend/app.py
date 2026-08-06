@@ -59,12 +59,12 @@ def clear_tasks():
 def handle_command(command):
     command = command.lower().strip()
 
-    if "what time" in command or "current time" in command:
+    if "time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
         return {"response": f"The time is {current_time}"}
 
-    if "search for" in command:
-        query = command.split("search for", 1)[1].strip()
+    if "search" in command:
+        query = extract_after(command, ["search for", "search", "google"])
         if query:
             return {
                 "response": f"Searching for {query}",
@@ -73,25 +73,33 @@ def handle_command(command):
             }
         return {"response": "What do you want me to search for?"}
 
-    if "weather in" in command:
-        city = command.split("weather in", 1)[1].strip()
+    if "weather" in command:
+        city = extract_after(command, ["weather in", "weather for", "weather"])
         if city:
             return {"response": get_weather(city)}
         return {"response": "Which city do you want the weather for?"}
 
-    if "add task" in command:
-        task_text = command.split("add task", 1)[1].strip()
+    if "task" in command and ("add" in command or "new" in command or "remind" in command):
+        task_text = extract_after(command, ["add task", "add a task", "new task", "remind me to", "remind me"])
         if task_text:
             return {"response": add_task(task_text)}
         return {"response": "What is the task?"}
 
-    if "my tasks" in command or "list tasks" in command:
+    if "task" in command and ("my" in command or "list" in command or "what" in command or "show" in command):
         return {"response": list_tasks()}
 
-    if "clear tasks" in command:
+    if "task" in command and "clear" in command:
         return {"response": clear_tasks()}
 
     return {"response": "I did not understand that command"}
+
+def extract_after(command, phrases):
+    for phrase in phrases:
+        if phrase in command:
+            result = command.split(phrase, 1)[1].strip()
+            if result:
+                return result
+    return ""
 
 @app.route("/api/command", methods=["POST"])
 def process_command():
