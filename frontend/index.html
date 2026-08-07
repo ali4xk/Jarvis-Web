@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>JARVIS</title>
+<title><J class="A R V I S"></J></title>
 <style>
   :root {
     --bg: #000000;
@@ -25,10 +25,10 @@
   }
 
   .topbar {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: 12px 30px;
+    padding: 14px 30px;
     border-bottom: 1px solid rgba(63, 193, 255, 0.25);
     font-size: 12px;
     letter-spacing: 2px;
@@ -36,14 +36,19 @@
   }
 
   .topbar .brand {
+    grid-column: 2;
     color: var(--yellow);
     font-weight: bold;
-    letter-spacing: 6px;
-    font-size: 16px;
-    text-shadow: 0 0 10px rgba(255, 212, 71, 0.5);
+    letter-spacing: 10px;
+    font-size: 24px;
+    text-shadow: 0 0 14px rgba(255, 212, 71, 0.6);
   }
 
-  .topbar .clock { color: var(--dim); }
+  .topbar .clock {
+    grid-column: 3;
+    justify-self: end;
+    color: var(--dim);
+  }
 
   .main {
     display: grid;
@@ -219,6 +224,16 @@
     border-radius: 2px;
   }
   .demo-btn:hover { background: rgba(63,193,255,0.1); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(63, 193, 255, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(63, 193, 255, 0.6); }
+
+  * { scrollbar-width: thin; scrollbar-color: rgba(63, 193, 255, 0.3) transparent; }
 </style>
 </head>
 <body>
@@ -269,7 +284,7 @@
       </div>
       <div class="status-text" id="statusText">LISTENING</div>
       <canvas class="wave-canvas" id="wave"></canvas>
-      <button class="demo-btn" id="listenBtn">TAP TO SPEAK</button>
+      <button class="demo-btn" id="listenBtn">ACTIVATE VOICE MODE</button>
     </div>
 
     <div class="col">
@@ -335,7 +350,7 @@
   }
 
   document.getElementById("listenBtn").addEventListener("click", () => {
-    startListening();
+    enableAutoListen();
   });
 
   function resizeCanvas(canvas) {
@@ -428,9 +443,12 @@
       }
 
       function onClapDetected() {
-        if (isListening) return;
+        if (isListening || isSpeaking) return;
         statusText.textContent = "CLAP DETECTED";
-        setTimeout(() => { startListening(); }, 400);
+        if (!autoListen) {
+          autoListen = true;
+        }
+        speakResponse("Yes? I'm listening.");
       }
 
       function renderWave() {
@@ -500,14 +518,26 @@
 
   function speakResponse(text) {
     if (!window.speechSynthesis) return;
+    if (recognition && isListening) {
+      recognition.abort();
+    }
+    isSpeaking = true;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
+    utterance.onend = () => {
+      setSpeaking(false);
+      isSpeaking = false;
+      if (autoListen) {
+        setTimeout(() => startListening(), 300);
+      }
+    };
     window.speechSynthesis.speak(utterance);
   }
 
   let recognition = null;
   let isListening = false;
+  let isSpeaking = false;
+  let autoListen = false;
 
   function setupSpeechRecognition() {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -535,21 +565,31 @@
 
     recognition.onerror = (event) => {
       console.log("Recognition error:", event.error);
-      statusText.textContent = "IDLE";
     };
 
     recognition.onend = () => {
       isListening = false;
-      if (statusText.textContent === "LISTENING") {
+      if (autoListen && !isSpeaking) {
+        setTimeout(() => startListening(), 400);
+      } else if (!isSpeaking) {
         statusText.textContent = "IDLE";
       }
     };
   }
 
   function startListening() {
-    if (recognition && !isListening) {
-      recognition.start();
+    if (recognition && !isListening && !isSpeaking) {
+      try {
+        recognition.start();
+      } catch (e) {
+        console.log("Recognition already running or blocked:", e);
+      }
     }
+  }
+
+  function enableAutoListen() {
+    autoListen = true;
+    startListening();
   }
 
   setupSpeechRecognition();
