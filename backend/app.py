@@ -4,6 +4,7 @@ import datetime
 import requests
 import json
 import os
+from urllib.parse import quote
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +19,7 @@ def get_weather(city):
         response = requests.get(url, params=params, timeout=5)
         data = response.json()
         if response.status_code != 200:
+            print(f"Weather API error: {response.status_code} - {data}")
             return f"I could not find weather for {city}"
         temp = data["main"]["temp"]
         description = data["weather"][0]["description"]
@@ -59,6 +61,9 @@ def clear_tasks():
 def handle_command(command):
     command = command.lower().strip()
 
+    if "hello" in command or "hey jarvis" in command or "hi jarvis" in command:
+        return {"response": "Hello, how can I help you today, sir?"}
+
     if "time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
         return {"response": f"The time is {current_time}"}
@@ -69,7 +74,7 @@ def handle_command(command):
             return {
                 "response": f"Searching for {query}",
                 "action": "open_url",
-                "url": f"https://www.google.com/search?q={query}"
+                "url": f"https://www.google.com/search?q={quote(query)}"
             }
         return {"response": "What do you want me to search for?"}
 
