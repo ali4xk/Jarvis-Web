@@ -304,7 +304,6 @@
 
       <div class="panel">
         <div class="panel-title">MARKETS</div>
-        <div class="mock-tag">MOCK</div>
         <div class="ticker-wrap" id="ticker-wrap"></div>
       </div>
 
@@ -448,7 +447,7 @@
         if (!autoListen) {
           autoListen = true;
         }
-        speakResponse("Greetings Sir! How may I help you today");
+        speakResponse("Yes? I'm listening.");
       }
 
       function renderWave() {
@@ -610,28 +609,31 @@
 
   setupSpeechRecognition();
 
-  const stocks = [
-    { sym: "AAPL", price: 227.4, dir: "up" },
-    { sym: "TSLA", price: 251.8, dir: "down" },
-    { sym: "MSFT", price: 418.2, dir: "up" },
-    { sym: "NVDA", price: 132.6, dir: "up" },
-    { sym: "GOOGL", price: 178.9, dir: "down" },
-  ];
-
-  function renderStocks() {
+  async function renderStocks() {
     const wrap = document.getElementById("ticker-wrap");
-    wrap.innerHTML = "";
-    stocks.forEach(s => {
-      s.price += (Math.random() - 0.5) * 1.2;
-      s.dir = Math.random() > 0.5 ? "up" : "down";
-      const row = document.createElement("div");
-      row.className = "ticker-item";
-      row.innerHTML = `<span class="sym">${s.sym}</span><span class="${s.dir}">$${s.price.toFixed(2)} ${s.dir === "up" ? "▲" : "▼"}</span>`;
-      wrap.appendChild(row);
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/stocks");
+      const data = await res.json();
+
+      if (!data.stocks || data.stocks.length === 0) {
+        wrap.innerHTML = `<div class="ticker-item"><span class="sym">MARKETS</span><span>unavailable</span></div>`;
+        return;
+      }
+
+      wrap.innerHTML = "";
+      data.stocks.forEach(s => {
+        const row = document.createElement("div");
+        row.className = "ticker-item";
+        row.innerHTML = `<span class="sym">${s.symbol}</span><span class="${s.direction}">$${s.price.toFixed(2)} ${s.direction === "up" ? "▲" : "▼"}</span>`;
+        wrap.appendChild(row);
+      });
+    } catch (err) {
+      wrap.innerHTML = `<div class="ticker-item"><span class="sym">MARKETS</span><span>backend offline</span></div>`;
+      console.log("Stocks fetch error:", err);
+    }
   }
   renderStocks();
-  setInterval(renderStocks, 3000);
+  setInterval(renderStocks, 15000);
 </script>
 
 </body>
