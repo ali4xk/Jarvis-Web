@@ -10,7 +10,9 @@ app = Flask(__name__)
 CORS(app)
 
 WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
+FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY")
 TASKS_FILE = "tasks.json"
+STOCK_SYMBOLS = ["AAPL", "TSLA", "MSFT", "NVDA", "GOOGL"]
 
 def get_weather(city):
     url = "https://api.openweathermap.org/data/2.5/weather"
@@ -26,6 +28,33 @@ def get_weather(city):
         return f"It is currently {temp} degrees Celsius with {description} in {city}"
     except requests.exceptions.RequestException:
         return "I could not reach the weather service"
+
+def get_stocks():
+    results = []
+    for symbol in STOCK_SYMBOLS:
+        try:
+            url = "https://finnhub.io/api/v1/quote"
+            params = {"symbol": symbol, "token": FINNHUB_API_KEY}
+            response = requests.get(url, params=params, timeout=5)
+            data = response.json()
+
+            current_price = data.get("c")
+            prev_close = data.get("pc")
+
+            if current_price is None or prev_close is None:
+                continue
+
+            change = current_price - prev_close
+            direction = "up" if change >= 0 else "down"
+
+            results.append({
+                "symbol": symbol,
+                "price": round(current_price, 2),
+                "direction": direction
+            })
+        except requests.exceptions.RequestException:
+            continue
+    return results
 
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
@@ -80,7 +109,7 @@ def handle_command(command):
     command = command.lower().strip()
 
     if "hello" in command or "hey jarvis" in command or "hi jarvis" in command:
-        return {"response": "Hello, how can I help you, sir?"}
+        return {"response": "Hello, how can I help you?"}
 
     if "time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
@@ -115,6 +144,10 @@ def handle_command(command):
         return {"response": list_tasks()}
 
     return {"response": "I did not understand that command"}
+
+@app.route("/api/stocks", methods=["GET"])
+def stocks():
+    return jsonify({"stocks": get_stocks()})
 
 @app.route("/api/command", methods=["POST"])
 def process_command():
