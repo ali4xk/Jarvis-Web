@@ -80,7 +80,7 @@ def handle_command(command):
     command = command.lower().strip()
 
     if "hello" in command or "hey jarvis" in command or "hi jarvis" in command:
-        return {"response": "Hello, how can I help you?"}
+        return {"response": "Hello, how can I help you, sir?"}
 
     if "time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
