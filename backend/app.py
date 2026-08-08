@@ -58,17 +58,35 @@ def clear_tasks():
     save_tasks([])
     return "All tasks cleared"
 
+FILLER_WORDS = ["today", "please", "now", "right now", "for me", "sir"]
+
+def clean_extracted(text):
+    text = text.strip().strip("?.!,")
+    words = text.split()
+    while words and words[-1].lower() in FILLER_WORDS:
+        words.pop()
+    return " ".join(words).strip()
+
+def extract_after(command, phrases):
+    for phrase in phrases:
+        if phrase in command:
+            result = command.split(phrase, 1)[1]
+            result = clean_extracted(result)
+            if result:
+                return result
+    return ""
+
 def handle_command(command):
     command = command.lower().strip()
 
     if "hello" in command or "hey jarvis" in command or "hi jarvis" in command:
-        return {"response": "Hello, how can I help you today, sir?"}
+        return {"response": "Hello, how can I help you?"}
 
     if "time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
         return {"response": f"The time is {current_time}"}
 
-    if "search" in command:
+    if "search" in command or "google" in command:
         query = extract_after(command, ["search for", "search", "google"])
         if query:
             return {
@@ -84,6 +102,9 @@ def handle_command(command):
             return {"response": get_weather(city)}
         return {"response": "Which city do you want the weather for?"}
 
+    if "task" in command and ("clear" in command or "delete" in command or "remove" in command):
+        return {"response": clear_tasks()}
+
     if "task" in command and ("add" in command or "new" in command or "remind" in command):
         task_text = extract_after(command, ["add task", "add a task", "new task", "remind me to", "remind me"])
         if task_text:
@@ -93,18 +114,7 @@ def handle_command(command):
     if "task" in command and ("my" in command or "list" in command or "what" in command or "show" in command):
         return {"response": list_tasks()}
 
-    if "task" in command and "clear" in command:
-        return {"response": clear_tasks()}
-
     return {"response": "I did not understand that command"}
-
-def extract_after(command, phrases):
-    for phrase in phrases:
-        if phrase in command:
-            result = command.split(phrase, 1)[1].strip()
-            if result:
-                return result
-    return ""
 
 @app.route("/api/command", methods=["POST"])
 def process_command():
