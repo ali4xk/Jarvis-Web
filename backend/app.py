@@ -164,6 +164,38 @@ def handle_command(command):
 
     return {"response": "I did not understand that command"}
 
+@app.route("/api/weather", methods=["GET"])
+def weather():
+    city = request.args.get("city")
+
+    if not city:
+        location_data = get_location()
+        city = location_data.get("city") if location_data else None
+
+    if not city:
+        return jsonify({"error": "Could not determine city"}), 502
+
+    url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {"q": city, "appid": WEATHER_API_KEY, "units": "metric"}
+
+    try:
+        response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+
+        if response.status_code != 200:
+            print(f"Weather API error: {response.status_code} - {data}")
+            return jsonify({"error": "Could not fetch weather"}), response.status_code
+
+        return jsonify({
+            "city": data.get("name", city),
+            "temperature": round(data["main"]["temp"]),
+            "condition": data["weather"][0]["description"].upper(),
+            "humidity": data["main"]["humidity"],
+            "wind": round(data["wind"]["speed"] * 3.6)
+        })
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "Could not reach weather service"}), 502
+
 @app.route("/api/location", methods=["GET"])
 def location():
     result = get_location()
