@@ -295,11 +295,10 @@
 
       <div class="panel">
         <div class="panel-title">LOCATION</div>
-        <div class="mock-tag">MOCK</div>
-        <div class="loc-row"><span>IP</span><span>203.101.44.12</span></div>
-        <div class="loc-row"><span>CITY</span><span>Lahore, PK</span></div>
-        <div class="loc-row"><span>LAT/LON</span><span>31.5497, 74.3436</span></div>
-        <div class="loc-row"><span>ALT</span><span>217m</span></div>
+        <div class="loc-row"><span>IP</span><span id="loc-ip">--</span></div>
+        <div class="loc-row"><span>CITY</span><span id="loc-city">--</span></div>
+        <div class="loc-row"><span>REGION</span><span id="loc-region">--</span></div>
+        <div class="loc-row"><span>LAT/LON</span><span id="loc-latlon">--</span></div>
       </div>
 
       <div class="panel">
@@ -632,6 +631,27 @@
       console.log("Stocks fetch error:", err);
     }
   }
+  async function fetchLocation() {
+    try {
+      const res = await fetch("http://localhost:5000/api/location");
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById("loc-ip").textContent = "unavailable";
+        return;
+      }
+
+      document.getElementById("loc-ip").textContent = data.ip || "--";
+      document.getElementById("loc-city").textContent = data.city || "--";
+      document.getElementById("loc-region").textContent = data.region || "--";
+      document.getElementById("loc-latlon").textContent = `${data.lat}, ${data.lon}`;
+    } catch (err) {
+      document.getElementById("loc-ip").textContent = "backend offline";
+      console.log("Location fetch error:", err);
+    }
+  }
+  fetchLocation();
+
   renderStocks();
   setInterval(renderStocks, 15000);
 </script>
