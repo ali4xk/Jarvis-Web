@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -155,12 +156,29 @@
   .ring-wrap.speaking .speak-wave:nth-child(7) { animation-delay: 0.9s; }
 
   @keyframes wave-out {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; border-color: var(--yellow); }
-    100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; border-color: var(--yellow); }
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.8;
+      border-color: var(--yellow);
+    }
+
+    100% {
+      transform: translate(-50%, -50%) scale(2.6);
+      opacity: 0;
+      border-color: var(--yellow);
+    }
   }
 
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  @keyframes spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spin-rev {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+  }
+
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(63, 193, 255, 0.5); }
     50% { box-shadow: 0 0 40px rgba(63, 193, 255, 0.9); }
@@ -173,25 +191,68 @@
     text-shadow: 0 0 8px rgba(63, 193, 255, 0.6);
   }
 
-  .wave-canvas { display: block; width: 100%; height: 90px; }
+  .wave-canvas {
+    display: block;
+    width: 100%;
+    height: 90px;
+  }
 
-  .transcript { max-height: 220px; overflow-y: auto; font-size: 11px; line-height: 1.8; }
-  .transcript .you::before { content: "> "; color: var(--dim); }
-  .transcript .you { color: var(--dim); margin-bottom: 3px; }
-  .transcript .jarvis::before { content: "> "; color: var(--yellow); }
-  .transcript .jarvis { color: var(--sky); margin-bottom: 10px; }
+  .transcript {
+    max-height: 220px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.8;
+  }
 
-  .radar-canvas { display: block; width: 100%; height: 140px; }
+  .transcript .you::before {
+    content: "> ";
+    color: var(--dim);
+  }
 
-  .loc-row { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 6px; color: var(--dim); }
+  .transcript .you {
+    color: var(--dim);
+    margin-bottom: 3px;
+  }
+
+  .transcript .jarvis::before {
+    content: "> ";
+    color: var(--yellow);
+  }
+
+  .transcript .jarvis {
+    color: var(--sky);
+    margin-bottom: 10px;
+  }
+
+  .radar-canvas {
+    display: block;
+    width: 100%;
+    height: 140px;
+  }
+
+  .loc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    margin-bottom: 6px;
+    color: var(--dim);
+  }
+
   .loc-row span:last-child { color: var(--sky); }
 
-  .ticker-wrap { max-height: 110px; overflow: hidden; }
+  .ticker-wrap {
+    max-height: 110px;
+    overflow: hidden;
+  }
+
   .ticker-item {
-    display: flex; justify-content: space-between;
-    font-size: 11px; padding: 4px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 4px 0;
     border-bottom: 1px solid rgba(255,255,255,0.05);
   }
+
   .ticker-item .up { color: #4AFF8C; }
   .ticker-item .down { color: #FF5C5C; }
   .ticker-item .sym { color: var(--yellow); }
@@ -206,10 +267,15 @@
   }
 
   .mock-tag {
-    position: absolute; top: 6px; right: 8px;
-    font-size: 8px; letter-spacing: 1px;
-    color: var(--dim); border: 1px solid var(--dim);
-    padding: 1px 4px; border-radius: 2px;
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--dim);
+    border: 1px solid var(--dim);
+    padding: 1px 4px;
+    border-radius: 2px;
   }
 
   .demo-btn {
@@ -223,19 +289,36 @@
     cursor: pointer;
     border-radius: 2px;
   }
-  .demo-btn:hover { background: rgba(63,193,255,0.1); }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  .demo-btn:hover {
+    background: rgba(63,193,255,0.1);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   ::-webkit-scrollbar-thumb {
     background: rgba(63, 193, 255, 0.3);
     border-radius: 3px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(63, 193, 255, 0.6); }
 
-  * { scrollbar-width: thin; scrollbar-color: rgba(63, 193, 255, 0.3) transparent; }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(63, 193, 255, 0.6);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(63, 193, 255, 0.3) transparent;
+  }
 </style>
 </head>
+
 <body>
 
   <div class="topbar">
@@ -246,6 +329,7 @@
   <div class="main">
 
     <div class="col">
+
       <div class="panel">
         <div class="panel-title">SYSTEM</div>
         <div class="stat-row"><span>STATUS</span><span>ONLINE</span></div>
@@ -255,39 +339,77 @@
         <div class="stat-row"><span>UPTIME</span><span id="uptime">00:00:00</span></div>
       </div>
 
+      <!-- LIVE WEATHER WIDGET -->
       <div class="panel">
         <div class="panel-title">WEATHER</div>
-        <div class="mock-tag">MOCK</div>
-        <div class="stat-row"><span>LAHORE</span><span>32°C</span></div>
-        <div class="stat-row"><span>CONDITION</span><span>CLEAR</span></div>
-        <div class="stat-row"><span>HUMIDITY</span><span>41%</span></div>
-        <div class="stat-row"><span>WIND</span><span>9 km/h</span></div>
+
+        <div class="stat-row">
+          <span id="weather-city">--</span>
+          <span id="weather-temp">--°C</span>
+        </div>
+
+        <div class="stat-row">
+          <span>CONDITION</span>
+          <span id="weather-condition">--</span>
+        </div>
+
+        <div class="stat-row">
+          <span>HUMIDITY</span>
+          <span id="weather-humidity">--%</span>
+        </div>
+
+        <div class="stat-row">
+          <span>WIND</span>
+          <span id="weather-wind">-- km/h</span>
+        </div>
       </div>
 
       <div class="panel">
         <div class="panel-title">NEWS</div>
         <div class="mock-tag">MOCK</div>
-        <div class="news-item">Local tech sector sees rise in software exports this quarter.</div>
-        <div class="news-item">New AI model release sparks discussion among developers.</div>
-        <div class="news-item">Weather authority issues heatwave advisory for the region.</div>
+
+        <div class="news-item">
+          Local tech sector sees rise in software exports this quarter.
+        </div>
+
+        <div class="news-item">
+          New AI model release sparks discussion among developers.
+        </div>
+
+        <div class="news-item">
+          Weather authority issues heatwave advisory for the region.
+        </div>
       </div>
+
     </div>
 
     <div class="center">
+
       <div class="ring-wrap" id="ringWrap">
         <div class="ring r1"></div>
         <div class="ring r2"></div>
+
         <div class="speak-wave"></div>
         <div class="speak-wave"></div>
         <div class="speak-wave"></div>
+
         <div class="core"></div>
       </div>
-      <div class="status-text" id="statusText">LISTENING</div>
+
+      <div class="status-text" id="statusText">
+        LISTENING
+      </div>
+
       <canvas class="wave-canvas" id="wave"></canvas>
-      <button class="demo-btn" id="listenBtn">ACTIVATE VOICE MODE</button>
+
+      <button class="demo-btn" id="listenBtn">
+        ACTIVATE VOICE MODE
+      </button>
+
     </div>
 
     <div class="col">
+
       <div class="panel">
         <div class="panel-title">RADAR</div>
         <canvas class="radar-canvas" id="radar"></canvas>
@@ -295,10 +417,26 @@
 
       <div class="panel">
         <div class="panel-title">LOCATION</div>
-        <div class="loc-row"><span>IP</span><span id="loc-ip">--</span></div>
-        <div class="loc-row"><span>CITY</span><span id="loc-city">--</span></div>
-        <div class="loc-row"><span>REGION</span><span id="loc-region">--</span></div>
-        <div class="loc-row"><span>LAT/LON</span><span id="loc-latlon">--</span></div>
+
+        <div class="loc-row">
+          <span>IP</span>
+          <span id="loc-ip">--</span>
+        </div>
+
+        <div class="loc-row">
+          <span>CITY</span>
+          <span id="loc-city">--</span>
+        </div>
+
+        <div class="loc-row">
+          <span>REGION</span>
+          <span id="loc-region">--</span>
+        </div>
+
+        <div class="loc-row">
+          <span>LAT/LON</span>
+          <span id="loc-latlon">--</span>
+        </div>
       </div>
 
       <div class="panel">
@@ -310,34 +448,49 @@
         <div class="panel-title">TRANSCRIPT</div>
         <div class="transcript" id="transcript"></div>
       </div>
+
     </div>
 
   </div>
 
 <script>
+
   function updateClock() {
-    document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+    document.getElementById("clock").textContent =
+      new Date().toLocaleTimeString();
   }
+
   setInterval(updateClock, 1000);
   updateClock();
 
+
   const startTime = Date.now();
+
   function updateUptime() {
     const diff = Math.floor((Date.now() - startTime) / 1000);
+
     const h = String(Math.floor(diff / 3600)).padStart(2, "0");
     const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
     const s = String(diff % 60).padStart(2, "0");
-    document.getElementById("uptime").textContent = `${h}:${m}:${s}`;
+
+    document.getElementById("uptime").textContent =
+      `${h}:${m}:${s}`;
   }
+
   setInterval(updateUptime, 1000);
 
+
   setInterval(() => {
-    document.getElementById("latency").textContent = (100 + Math.floor(Math.random() * 80)) + "ms";
+    document.getElementById("latency").textContent =
+      (100 + Math.floor(Math.random() * 80)) + "ms";
   }, 2000);
 
+
   function setSpeaking(isSpeaking) {
+
     const ringWrap = document.getElementById("ringWrap");
     const statusText = document.getElementById("statusText");
+
     if (isSpeaking) {
       ringWrap.classList.add("speaking");
       statusText.textContent = "SPEAKING";
@@ -345,316 +498,938 @@
       ringWrap.classList.remove("speaking");
       statusText.textContent = "LISTENING";
     }
+
   }
+
 
   document.getElementById("listenBtn").addEventListener("click", () => {
     enableAutoListen();
   });
+
 
   function resizeCanvas(canvas) {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
   }
 
+
   const radarCanvas = document.getElementById("radar");
   const radarCtx = radarCanvas.getContext("2d");
+
   let sweepAngle = 0;
 
+
   function drawRadar() {
+
     resizeCanvas(radarCanvas);
-    const w = radarCanvas.width, h = radarCanvas.height;
-    const cx = w / 2, cy = h / 2;
+
+    const w = radarCanvas.width;
+    const h = radarCanvas.height;
+
+    const cx = w / 2;
+    const cy = h / 2;
+
     const r = Math.min(w, h) / 2 - 4;
 
     radarCtx.clearRect(0, 0, w, h);
+
     radarCtx.strokeStyle = "rgba(63,193,255,0.25)";
     radarCtx.lineWidth = 1;
+
     for (let i = 1; i <= 3; i++) {
+
       radarCtx.beginPath();
-      radarCtx.arc(cx, cy, (r / 3) * i, 0, Math.PI * 2);
+
+      radarCtx.arc(
+        cx,
+        cy,
+        (r / 3) * i,
+        0,
+        Math.PI * 2
+      );
+
       radarCtx.stroke();
+
     }
+
+
     radarCtx.beginPath();
-    radarCtx.moveTo(cx - r, cy); radarCtx.lineTo(cx + r, cy);
-    radarCtx.moveTo(cx, cy - r); radarCtx.lineTo(cx, cy + r);
+
+    radarCtx.moveTo(cx - r, cy);
+    radarCtx.lineTo(cx + r, cy);
+
+    radarCtx.moveTo(cx, cy - r);
+    radarCtx.lineTo(cx, cy + r);
+
     radarCtx.stroke();
 
-    const grad = radarCtx.createConicGradient(sweepAngle - Math.PI / 2, cx, cy);
-    grad.addColorStop(0, "rgba(63,193,255,0.5)");
-    grad.addColorStop(0.08, "rgba(63,193,255,0)");
-    grad.addColorStop(1, "rgba(63,193,255,0)");
+
+    const grad = radarCtx.createConicGradient(
+      sweepAngle - Math.PI / 2,
+      cx,
+      cy
+    );
+
+    grad.addColorStop(
+      0,
+      "rgba(63,193,255,0.5)"
+    );
+
+    grad.addColorStop(
+      0.08,
+      "rgba(63,193,255,0)"
+    );
+
+    grad.addColorStop(
+      1,
+      "rgba(63,193,255,0)"
+    );
+
     radarCtx.fillStyle = grad;
+
     radarCtx.beginPath();
-    radarCtx.arc(cx, cy, r, 0, Math.PI * 2);
+
+    radarCtx.arc(
+      cx,
+      cy,
+      r,
+      0,
+      Math.PI * 2
+    );
+
     radarCtx.fill();
 
+
     radarCtx.strokeStyle = "#FFD447";
+
     radarCtx.beginPath();
+
     radarCtx.moveTo(cx, cy);
-    radarCtx.lineTo(cx + r * Math.cos(sweepAngle), cy + r * Math.sin(sweepAngle));
+
+    radarCtx.lineTo(
+      cx + r * Math.cos(sweepAngle),
+      cy + r * Math.sin(sweepAngle)
+    );
+
     radarCtx.stroke();
 
+
     sweepAngle += 0.03;
+
     requestAnimationFrame(drawRadar);
+
   }
+
   drawRadar();
+
 
   const waveCanvas = document.getElementById("wave");
   const waveCtx = waveCanvas.getContext("2d");
 
+
   function drawIdleWave() {
+
     resizeCanvas(waveCanvas);
-    const w = waveCanvas.width, h = waveCanvas.height;
+
+    const w = waveCanvas.width;
+    const h = waveCanvas.height;
+
     waveCtx.clearRect(0, 0, w, h);
-    waveCtx.strokeStyle = "rgba(63,193,255,0.3)";
+
+    waveCtx.strokeStyle =
+      "rgba(63,193,255,0.3)";
+
     waveCtx.beginPath();
+
     waveCtx.moveTo(0, h / 2);
     waveCtx.lineTo(w, h / 2);
+
     waveCtx.stroke();
+
   }
+
   drawIdleWave();
 
+
   async function setupMicWaveform() {
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioCtx.createAnalyser();
+
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
+
+      const audioCtx =
+        new (window.AudioContext ||
+        window.webkitAudioContext)();
+
+      const analyser =
+        audioCtx.createAnalyser();
+
       analyser.fftSize = 1024;
-      const source = audioCtx.createMediaStreamSource(stream);
+
+      const source =
+        audioCtx.createMediaStreamSource(stream);
+
       source.connect(analyser);
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
+
+      const bufferLength =
+        analyser.frequencyBinCount;
+
+      const dataArray =
+        new Uint8Array(bufferLength);
+
 
       let clapCooldown = false;
 
+
       function checkForClap() {
+
         let peak = 0;
+
         for (let i = 0; i < bufferLength; i++) {
-          const v = Math.abs(dataArray[i] - 128);
-          if (v > peak) peak = v;
+
+          const v =
+            Math.abs(dataArray[i] - 128);
+
+          if (v > peak)
+            peak = v;
+
         }
+
+
         if (peak > 100 && !clapCooldown) {
+
           clapCooldown = true;
+
           onClapDetected();
-          setTimeout(() => { clapCooldown = false; }, 800);
+
+          setTimeout(() => {
+            clapCooldown = false;
+          }, 800);
+
         }
+
       }
 
+
       function onClapDetected() {
-        if (isListening || isSpeaking) return;
-        statusText.textContent = "CLAP DETECTED";
+
+        if (isListening || isSpeaking)
+          return;
+
+        statusText.textContent =
+          "CLAP DETECTED";
+
         if (!autoListen) {
           autoListen = true;
         }
+
         speakResponse("Yes? I'm listening.");
+
       }
+
 
       function renderWave() {
+
         resizeCanvas(waveCanvas);
-        analyser.getByteTimeDomainData(dataArray);
+
+        analyser.getByteTimeDomainData(
+          dataArray
+        );
+
         checkForClap();
-        const w = waveCanvas.width, h = waveCanvas.height;
-        waveCtx.clearRect(0, 0, w, h);
+
+
+        const w = waveCanvas.width;
+        const h = waveCanvas.height;
+
+        waveCtx.clearRect(
+          0,
+          0,
+          w,
+          h
+        );
+
         waveCtx.lineWidth = 2;
-        waveCtx.strokeStyle = "#3FC1FF";
-        waveCtx.shadowColor = "#3FC1FF";
+
+        waveCtx.strokeStyle =
+          "#3FC1FF";
+
+        waveCtx.shadowColor =
+          "#3FC1FF";
+
         waveCtx.shadowBlur = 8;
+
         waveCtx.beginPath();
-        const sliceWidth = w / bufferLength;
+
+
+        const sliceWidth =
+          w / bufferLength;
+
         let x = 0;
+
+
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = (v * h) / 2;
-          if (i === 0) waveCtx.moveTo(x, y);
-          else waveCtx.lineTo(x, y);
+
+          const v =
+            dataArray[i] / 128.0;
+
+          const y =
+            (v * h) / 2;
+
+
+          if (i === 0)
+            waveCtx.moveTo(x, y);
+          else
+            waveCtx.lineTo(x, y);
+
           x += sliceWidth;
+
         }
+
+
         waveCtx.stroke();
+
         requestAnimationFrame(renderWave);
+
       }
+
       renderWave();
+
     } catch (err) {
-      console.log("Mic access not granted, showing idle waveform:", err);
+
+      console.log(
+        "Mic access not granted, showing idle waveform:",
+        err
+      );
+
     }
+
   }
+
   setupMicWaveform();
 
-  const BACKEND_URL = "http://localhost:5000/api/command";
-  const statusText = document.getElementById("statusText");
-  const transcriptEl = document.getElementById("transcript");
+
+  const BACKEND_URL =
+    "http://localhost:5000/api/command";
+
+  const statusText =
+    document.getElementById("statusText");
+
+  const transcriptEl =
+    document.getElementById("transcript");
+
 
   function addToTranscript(who, text) {
-    const line = document.createElement("div");
+
+    const line =
+      document.createElement("div");
+
     line.className = who;
+
     line.textContent = text;
+
     transcriptEl.appendChild(line);
-    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+
+    transcriptEl.scrollTop =
+      transcriptEl.scrollHeight;
+
   }
+
 
   function addLinkToTranscript(url) {
-    const line = document.createElement("div");
+
+    const line =
+      document.createElement("div");
+
     line.className = "jarvis";
-    const link = document.createElement("a");
+
+
+    const link =
+      document.createElement("a");
+
     link.href = url;
+
     link.target = "_blank";
-    link.textContent = "Open result";
-    link.style.color = "var(--yellow)";
+
+    link.textContent =
+      "Open result";
+
+    link.style.color =
+      "var(--yellow)";
+
+
     line.appendChild(link);
+
     transcriptEl.appendChild(line);
-    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+
+    transcriptEl.scrollTop =
+      transcriptEl.scrollHeight;
+
   }
+
 
   async function sendCommandToBackend(commandText) {
+
     try {
-      const res = await fetch(BACKEND_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: commandText })
-      });
-      const data = await res.json();
 
-      addToTranscript("jarvis", data.response);
-      speakResponse(data.response);
+      const res =
+        await fetch(BACKEND_URL, {
 
-      if (data.action === "open_url" && data.url) {
-        const opened = window.open(data.url, "_blank");
-        if (!opened || opened.closed || typeof opened.closed === "undefined") {
-          addLinkToTranscript(data.url);
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            command: commandText
+          })
+
+        });
+
+
+      const data =
+        await res.json();
+
+
+      addToTranscript(
+        "jarvis",
+        data.response
+      );
+
+      speakResponse(
+        data.response
+      );
+
+
+      if (
+        data.action === "open_url" &&
+        data.url
+      ) {
+
+        const opened =
+          window.open(
+            data.url,
+            "_blank"
+          );
+
+
+        if (
+          !opened ||
+          opened.closed ||
+          typeof opened.closed ===
+          "undefined"
+        ) {
+
+          addLinkToTranscript(
+            data.url
+          );
+
         }
+
       }
+
     } catch (err) {
-      const msg = "I could not reach the backend";
-      addToTranscript("jarvis", msg);
+
+      const msg =
+        "I could not reach the backend";
+
+      addToTranscript(
+        "jarvis",
+        msg
+      );
+
       speakResponse(msg);
-      console.log("Backend error:", err);
+
+      console.log(
+        "Backend error:",
+        err
+      );
+
     }
+
   }
 
+
   function speakResponse(text) {
-    if (!window.speechSynthesis) return;
+
+    if (!window.speechSynthesis)
+      return;
+
+
     if (recognition && isListening) {
       recognition.abort();
     }
+
+
     isSpeaking = true;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => {
-      setSpeaking(false);
-      isSpeaking = false;
-      if (autoListen) {
-        setTimeout(() => startListening(), 300);
-      }
+
+
+    const utterance =
+      new SpeechSynthesisUtterance(text);
+
+
+    utterance.onstart = () => {
+      setSpeaking(true);
     };
-    window.speechSynthesis.speak(utterance);
+
+
+    utterance.onend = () => {
+
+      setSpeaking(false);
+
+      isSpeaking = false;
+
+
+      if (autoListen) {
+
+        setTimeout(
+          () => startListening(),
+          300
+        );
+
+      }
+
+    };
+
+
+    window.speechSynthesis.speak(
+      utterance
+    );
+
   }
+
 
   let recognition = null;
   let isListening = false;
   let isSpeaking = false;
   let autoListen = false;
 
+
   function setupSpeechRecognition() {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+
     if (!SpeechRecognitionAPI) {
-      statusText.textContent = "SPEECH NOT SUPPORTED";
-      console.log("This browser does not support the Web Speech API.");
+
+      statusText.textContent =
+        "SPEECH NOT SUPPORTED";
+
+      console.log(
+        "This browser does not support the Web Speech API."
+      );
+
       return;
+
     }
 
-    recognition = new SpeechRecognitionAPI();
+
+    recognition =
+      new SpeechRecognitionAPI();
+
+
     recognition.continuous = false;
+
     recognition.interimResults = false;
+
     recognition.lang = "en-US";
 
+
     recognition.onstart = () => {
+
       isListening = true;
-      statusText.textContent = "LISTENING";
+
+      statusText.textContent =
+        "LISTENING";
+
     };
+
 
     recognition.onresult = (event) => {
-      const said = event.results[0][0].transcript;
-      addToTranscript("you", said);
-      sendCommandToBackend(said);
+
+      const said =
+        event.results[0][0].transcript;
+
+      addToTranscript(
+        "you",
+        said
+      );
+
+      sendCommandToBackend(
+        said
+      );
+
     };
+
 
     recognition.onerror = (event) => {
-      console.log("Recognition error:", event.error);
+
+      console.log(
+        "Recognition error:",
+        event.error
+      );
+
     };
+
 
     recognition.onend = () => {
+
       isListening = false;
-      if (autoListen && !isSpeaking) {
-        setTimeout(() => startListening(), 400);
+
+
+      if (
+        autoListen &&
+        !isSpeaking
+      ) {
+
+        setTimeout(
+          () => startListening(),
+          400
+        );
+
       } else if (!isSpeaking) {
-        statusText.textContent = "IDLE";
+
+        statusText.textContent =
+          "IDLE";
+
       }
+
     };
+
   }
+
 
   function startListening() {
-    if (recognition && !isListening && !isSpeaking) {
+
+    if (
+      recognition &&
+      !isListening &&
+      !isSpeaking
+    ) {
+
       try {
+
         recognition.start();
+
       } catch (e) {
-        console.log("Recognition already running or blocked:", e);
+
+        console.log(
+          "Recognition already running or blocked:",
+          e
+        );
+
       }
+
     }
+
   }
 
+
   function enableAutoListen() {
+
     autoListen = true;
+
     startListening();
+
   }
+
 
   setupSpeechRecognition();
 
-  async function renderStocks() {
-    const wrap = document.getElementById("ticker-wrap");
-    try {
-      const res = await fetch("http://localhost:5000/api/stocks");
-      const data = await res.json();
 
-      if (!data.stocks || data.stocks.length === 0) {
-        wrap.innerHTML = `<div class="ticker-item"><span class="sym">MARKETS</span><span>unavailable</span></div>`;
+  async function renderStocks() {
+
+    const wrap =
+      document.getElementById(
+        "ticker-wrap"
+      );
+
+
+    try {
+
+      const res =
+        await fetch(
+          "http://localhost:5000/api/stocks"
+        );
+
+
+      const data =
+        await res.json();
+
+
+      if (
+        !data.stocks ||
+        data.stocks.length === 0
+      ) {
+
+        wrap.innerHTML =
+          `<div class="ticker-item">
+            <span class="sym">MARKETS</span>
+            <span>unavailable</span>
+          </div>`;
+
         return;
+
       }
+
 
       wrap.innerHTML = "";
+
+
       data.stocks.forEach(s => {
-        const row = document.createElement("div");
-        row.className = "ticker-item";
-        row.innerHTML = `<span class="sym">${s.symbol}</span><span class="${s.direction}">$${s.price.toFixed(2)} ${s.direction === "up" ? "▲" : "▼"}</span>`;
+
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "ticker-item";
+
+
+        row.innerHTML =
+          `<span class="sym">
+             ${s.symbol}
+           </span>
+           <span class="${s.direction}">
+             $${s.price.toFixed(2)}
+             ${s.direction === "up" ? "▲" : "▼"}
+           </span>`;
+
+
         wrap.appendChild(row);
+
       });
+
     } catch (err) {
-      wrap.innerHTML = `<div class="ticker-item"><span class="sym">MARKETS</span><span>backend offline</span></div>`;
-      console.log("Stocks fetch error:", err);
+
+      wrap.innerHTML =
+        `<div class="ticker-item">
+          <span class="sym">MARKETS</span>
+          <span>backend offline</span>
+        </div>`;
+
+      console.log(
+        "Stocks fetch error:",
+        err
+      );
+
     }
+
   }
-  async function fetchLocation() {
+
+
+  // ============================
+  // LIVE WEATHER
+  // ============================
+
+  async function fetchWeather() {
+
     try {
-      const res = await fetch("http://localhost:5000/api/location");
-      const data = await res.json();
+
+      const res =
+        await fetch(
+          "http://localhost:5000/api/weather"
+        );
+
+
+      const data =
+        await res.json();
+
 
       if (data.error) {
-        document.getElementById("loc-ip").textContent = "unavailable";
+
+        document.getElementById(
+          "weather-city"
+        ).textContent =
+          "UNAVAILABLE";
+
+        document.getElementById(
+          "weather-temp"
+        ).textContent =
+          "--°C";
+
+        document.getElementById(
+          "weather-condition"
+        ).textContent =
+          "--";
+
+        document.getElementById(
+          "weather-humidity"
+        ).textContent =
+          "--%";
+
+        document.getElementById(
+          "weather-wind"
+        ).textContent =
+          "-- km/h";
+
         return;
+
       }
 
-      document.getElementById("loc-ip").textContent = data.ip || "--";
-      document.getElementById("loc-city").textContent = data.city || "--";
-      document.getElementById("loc-region").textContent = data.region || "--";
-      document.getElementById("loc-latlon").textContent = `${data.lat}, ${data.lon}`;
+
+      document.getElementById(
+        "weather-city"
+      ).textContent =
+        data.city.toUpperCase();
+
+
+      document.getElementById(
+        "weather-temp"
+      ).textContent =
+        `${data.temperature}°C`;
+
+
+      document.getElementById(
+        "weather-condition"
+      ).textContent =
+        data.condition;
+
+
+      document.getElementById(
+        "weather-humidity"
+      ).textContent =
+        `${data.humidity}%`;
+
+
+      document.getElementById(
+        "weather-wind"
+      ).textContent =
+        `${data.wind} km/h`;
+
+
     } catch (err) {
-      document.getElementById("loc-ip").textContent = "backend offline";
-      console.log("Location fetch error:", err);
+
+      document.getElementById(
+        "weather-city"
+      ).textContent =
+        "BACKEND OFFLINE";
+
+      document.getElementById(
+        "weather-temp"
+      ).textContent =
+        "--°C";
+
+      document.getElementById(
+        "weather-condition"
+      ).textContent =
+        "--";
+
+      document.getElementById(
+        "weather-humidity"
+      ).textContent =
+        "--%";
+
+      document.getElementById(
+        "weather-wind"
+      ).textContent =
+        "-- km/h";
+
+
+      console.log(
+        "Weather fetch error:",
+        err
+      );
+
     }
+
   }
+
+
+  async function fetchLocation() {
+
+    try {
+
+      const res =
+        await fetch(
+          "http://localhost:5000/api/location"
+        );
+
+
+      const data =
+        await res.json();
+
+
+      if (data.error) {
+
+        document.getElementById(
+          "loc-ip"
+        ).textContent =
+          "unavailable";
+
+        return;
+
+      }
+
+
+      document.getElementById(
+        "loc-ip"
+      ).textContent =
+        data.ip || "--";
+
+
+      document.getElementById(
+        "loc-city"
+      ).textContent =
+        data.city || "--";
+
+
+      document.getElementById(
+        "loc-region"
+      ).textContent =
+        data.region || "--";
+
+
+      document.getElementById(
+        "loc-latlon"
+      ).textContent =
+        `${data.lat}, ${data.lon}`;
+
+    } catch (err) {
+
+      document.getElementById(
+        "loc-ip"
+      ).textContent =
+        "backend offline";
+
+      console.log(
+        "Location fetch error:",
+        err
+      );
+
+    }
+
+  }
+
+
+  // Load live weather and location
+  fetchWeather();
+  setInterval(
+    fetchWeather,
+    15 * 60 * 1000
+  );
+
   fetchLocation();
 
+
+  // Load stocks
   renderStocks();
-  setInterval(renderStocks, 15000);
+
+  setInterval(
+    renderStocks,
+    15000
+  );
+
 </script>
 
 </body>
 </html>
+```
