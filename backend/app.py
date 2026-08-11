@@ -29,6 +29,24 @@ def get_weather(city):
     except requests.exceptions.RequestException:
         return "I could not reach the weather service"
 
+def get_location():
+    try:
+        response = requests.get("http://ip-api.com/json/", timeout=5)
+        data = response.json()
+        if data.get("status") != "success":
+            return None
+        return {
+            "ip": data.get("query"),
+            "city": data.get("city"),
+            "region": data.get("regionName"),
+            "country": data.get("country"),
+            "lat": data.get("lat"),
+            "lon": data.get("lon"),
+            "isp": data.get("isp")
+        }
+    except requests.exceptions.RequestException:
+        return None
+
 def get_stocks():
     results = []
     for symbol in STOCK_SYMBOLS:
@@ -42,6 +60,7 @@ def get_stocks():
             prev_close = data.get("pc")
 
             if current_price is None or prev_close is None:
+                print(f"Stock fetch issue for {symbol}: {data}")
                 continue
 
             change = current_price - prev_close
@@ -144,6 +163,13 @@ def handle_command(command):
         return {"response": list_tasks()}
 
     return {"response": "I did not understand that command"}
+
+@app.route("/api/location", methods=["GET"])
+def location():
+    result = get_location()
+    if result is None:
+        return jsonify({"error": "Could not determine location"}), 502
+    return jsonify(result)
 
 @app.route("/api/stocks", methods=["GET"])
 def stocks():
