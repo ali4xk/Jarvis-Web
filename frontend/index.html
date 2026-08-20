@@ -10,6 +10,7 @@
     --sky: #3FC1FF;
     --yellow: #FFD447;
     --red: #FF3B3B;
+    --green: #3FFF8C;
     --text: #E8ECF1;
     --dim: #5A6472;
   }
@@ -212,6 +213,57 @@
   .loc-row span:last-child { color: var(--sky); }
 
   .ticker-wrap { max-height: 110px; overflow: hidden; }
+
+  .market-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(63, 193, 255, 0.15);
+  }
+
+  .page-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    margin-right: 4px;
+    display: inline-block;
+  }
+
+  .page-dot.active { background: var(--sky); }
+
+  #markets-panel.psx-mode .page-dot.active { background: var(--green); }
+
+  .page-btn {
+    background: transparent;
+    border: 1px solid rgba(63, 193, 255, 0.4);
+    color: var(--sky);
+    font-family: inherit;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  #markets-panel.psx-mode {
+    border-color: rgba(63, 255, 140, 0.35);
+    box-shadow: 0 0 16px rgba(63, 255, 140, 0.08);
+  }
+
+  #markets-panel.psx-mode .panel-title {
+    color: var(--green);
+    border-bottom-color: rgba(63, 255, 140, 0.25);
+  }
+
+  #markets-panel.psx-mode .page-btn {
+    border-color: rgba(63, 255, 140, 0.4);
+    color: var(--green);
+  }
+
+  #markets-panel.psx-mode .ticker-item .sym { color: var(--green); }
   .ticker-item {
     display: flex; justify-content: space-between;
     font-size: 11px; padding: 4px 0;
@@ -330,9 +382,14 @@
         <div class="loc-row"><span>LAT/LON</span><span id="loc-latlon">--</span></div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title">MARKETS</div>
+      <div class="panel" id="markets-panel">
+        <div class="panel-title" id="markets-title">MARKETS — US</div>
         <div class="ticker-wrap" id="ticker-wrap"></div>
+        <div class="market-nav">
+          <span class="page-dot active" id="dot-us"></span>
+          <span class="page-dot" id="dot-psx"></span>
+          <button class="page-btn" id="marketsNextBtn">NEXT ▸</button>
+        </div>
       </div>
 
       <div class="panel">
@@ -389,6 +446,22 @@
   const radarCtx = radarCanvas.getContext("2d");
   let sweepAngle = 0;
 
+  let radarTargets = [];
+
+  function generateRadarTargets() {
+    radarTargets = [];
+    const count = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      radarTargets.push({
+        angle: Math.random() * Math.PI * 2,
+        distance: 0.3 + Math.random() * 0.65,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  generateRadarTargets();
+  setInterval(generateRadarTargets, 8000);
+
   function drawRadar() {
     resizeCanvas(radarCanvas);
     const w = radarCanvas.width, h = radarCanvas.height;
@@ -422,6 +495,23 @@
     radarCtx.moveTo(cx, cy);
     radarCtx.lineTo(cx + r * Math.cos(sweepAngle), cy + r * Math.sin(sweepAngle));
     radarCtx.stroke();
+
+    radarTargets.forEach(t => {
+      const tx = cx + r * t.distance * Math.cos(t.angle);
+      const ty = cy + r * t.distance * Math.sin(t.angle);
+      const pulse = 0.5 + 0.5 * Math.sin(sweepAngle * 3 + t.phase);
+      const blipRadius = 2.5 + pulse * 1.5;
+
+      radarCtx.beginPath();
+      radarCtx.arc(tx, ty, blipRadius * 2.5, 0, Math.PI * 2);
+      radarCtx.fillStyle = `rgba(255, 59, 59, ${0.08 + pulse * 0.06})`;
+      radarCtx.fill();
+
+      radarCtx.beginPath();
+      radarCtx.arc(tx, ty, blipRadius, 0, Math.PI * 2);
+      radarCtx.fillStyle = `rgba(255, 59, 59, ${0.6 + pulse * 0.4})`;
+      radarCtx.fill();
+    });
 
     sweepAngle += 0.03;
     requestAnimationFrame(drawRadar);
@@ -634,7 +724,36 @@
   setupMicWaveform();
   setupSpeechRecognition();
 
+  let marketsPage = "us";
+
+  const PSX_STOCKS = [
+    { symbol: "OGDC", price: 142.35 },
+    { symbol: "LUCK", price: 891.10 },
+    { symbol: "HBL", price: 198.75 },
+    { symbol: "ENGRO", price: 305.40 },
+    { symbol: "PPL", price: 128.60 }
+  ];
+
+  function renderPsxStocks() {
+    const wrap = document.getElementById("ticker-wrap");
+    wrap.innerHTML = "";
+    PSX_STOCKS.forEach(s => {
+      const jitter = (Math.random() - 0.5) * 2;
+      const direction = jitter >= 0 ? "up" : "down";
+      const price = (s.price + jitter).toFixed(2);
+      const row = document.createElement("div");
+      row.className = "ticker-item";
+      row.innerHTML = `<span class="sym">${s.symbol}</span><span class="${direction}">Rs ${price} ${direction === "up" ? "▲" : "▼"}</span>`;
+      wrap.appendChild(row);
+    });
+  }
+
   async function renderStocks() {
+    if (marketsPage === "psx") {
+      renderPsxStocks();
+      return;
+    }
+
     const wrap = document.getElementById("ticker-wrap");
     try {
       const res = await fetch("http://localhost:5000/api/stocks");
@@ -657,6 +776,28 @@
       console.log("Stocks fetch error:", err);
     }
   }
+
+  document.getElementById("marketsNextBtn").addEventListener("click", () => {
+    const panel = document.getElementById("markets-panel");
+    const title = document.getElementById("markets-title");
+    const dotUs = document.getElementById("dot-us");
+    const dotPsx = document.getElementById("dot-psx");
+
+    if (marketsPage === "us") {
+      marketsPage = "psx";
+      panel.classList.add("psx-mode");
+      title.textContent = "MARKETS — PSX (MOCK)";
+      dotUs.classList.remove("active");
+      dotPsx.classList.add("active");
+    } else {
+      marketsPage = "us";
+      panel.classList.remove("psx-mode");
+      title.textContent = "MARKETS — US";
+      dotPsx.classList.remove("active");
+      dotUs.classList.add("active");
+    }
+    renderStocks();
+  });
 
   async function fetchWeather() {
     const setAll = (city, temp, cond, hum, wind) => {
