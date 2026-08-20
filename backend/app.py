@@ -11,6 +11,7 @@ CORS(app)
 
 WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
 TASKS_FILE = "tasks.json"
 STOCK_SYMBOLS = ["AAPL", "TSLA", "MSFT", "NVDA", "GOOGL"]
 
@@ -74,6 +75,27 @@ def get_stocks():
         except requests.exceptions.RequestException:
             continue
     return results
+
+def get_news(country="us", page_size=5):
+    try:
+        url = "https://newsapi.org/v2/top-headlines"
+        params = {"country": country, "pageSize": page_size, "apiKey": NEWS_API_KEY}
+        response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+
+        if data.get("status") != "ok":
+            print(f"News API error: {data}")
+            return None
+
+        articles = []
+        for article in data.get("articles", []):
+            title = article.get("title")
+            source = article.get("source", {}).get("name")
+            if title:
+                articles.append({"title": title, "source": source})
+        return articles
+    except requests.exceptions.RequestException:
+        return None
 
 def load_tasks():
     if not os.path.exists(TASKS_FILE):
@@ -195,6 +217,13 @@ def weather():
         })
     except requests.exceptions.RequestException:
         return jsonify({"error": "Could not reach weather service"}), 502
+
+@app.route("/api/news", methods=["GET"])
+def news():
+    articles = get_news()
+    if articles is None:
+        return jsonify({"error": "Could not fetch news"}), 502
+    return jsonify({"articles": articles})
 
 @app.route("/api/location", methods=["GET"])
 def location():
