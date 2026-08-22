@@ -627,6 +627,10 @@
   let isSpeaking = false;
   let autoListen = false;
 
+  let silenceTimer = null;
+  let accumulatedTranscript = "";
+  const SILENCE_DELAY_MS = 1500;
+
   function setupSpeechRecognition() {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
@@ -636,19 +640,37 @@
     }
 
     recognition = new SpeechRecognitionAPI();
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.lang = "en-US";
 
     recognition.onstart = () => {
       isListening = true;
+      accumulatedTranscript = "";
       statusText.textContent = "LISTENING";
     };
 
     recognition.onresult = (event) => {
-      const said = event.results[0][0].transcript;
-      addToTranscript("you", said);
-      sendCommandToBackend(said);
+      let finalChunk = "";
+      let interimChunk = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalChunk += transcript;
+        } else {
+          interimChunk += transcript;
+        }
+      }
+
+      if (finalChunk) {
+        accumulatedTranscript += finalChunk;
+      }
+
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        finishListening();
+      }, SILENCE_DELAY_MS);
     };
 
     recognition.onerror = (event) => {
@@ -657,12 +679,29 @@
 
     recognition.onend = () => {
       isListening = false;
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+      }
+      if (accumulatedTranscript.trim()) {
+        const said = accumulatedTranscript.trim();
+        accumulatedTranscript = "";
+        addToTranscript("you", said);
+        sendCommandToBackend(said);
+        return;
+      }
       if (autoListen && !isSpeaking) {
         setTimeout(() => startListening(), 400);
       } else if (!isSpeaking) {
         statusText.textContent = "IDLE";
       }
     };
+  }
+
+  function finishListening() {
+    if (recognition && isListening) {
+      recognition.stop();
+    }
   }
 
   function startListening() {
