@@ -5,6 +5,7 @@ import requests
 import json
 import os
 from urllib.parse import quote
+import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app)
@@ -12,8 +13,12 @@ CORS(app)
 WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TASKS_FILE = "tasks.json"
 STOCK_SYMBOLS = ["AAPL", "TSLA", "MSFT", "NVDA", "GOOGL"]
+
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 def get_weather(city):
     url = "https://api.openweathermap.org/data/2.5/weather"
@@ -146,6 +151,98 @@ def extract_after(command, phrases):
                 return result
     return ""
 
+GEMINI_TOOLS = [
+    {
+        "name": "get_current_time",
+        "description": "Get the current time",
+        "parameters": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "search_web",
+        "description": "Search Google for a query and open the results",
+        "parameters": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "What to search for"}},
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "get_weather_for_city",
+        "description": "Get the current weather for a specific city",
+        "parameters": {
+            "type": "object",
+            "properties": {"city": {"type": "string", "description": "The city name"}},
+            "required": ["city"]
+        }
+    },
+    {
+        "name": "add_new_task",
+        "description": "Add a new task or reminder to the to-do list",
+        "parameters": {
+            "type": "object",
+            "properties": {"task": {"type": "string", "description": "The task text"}},
+            "required": ["task"]
+        }
+    },
+    {
+        "name": "list_all_tasks",
+        "description": "List all current tasks on the to-do list",
+        "parameters": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "clear_all_tasks",
+        "description": "Clear/delete all tasks from the to-do list",
+        "parameters": {"type": "object", "properties": {}}
+    }
+]
+
+def execute_tool_call(name, args):
+    if name == "get_current_time":
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        return {"response": f"The time is {current_time}"}
+    if name == "search_web":
+        query = args.get("query", "")
+        return {
+            "response": f"Searching for {query}",
+            "action": "open_url",
+            "url": f"https://www.google.com/search?q={quote(query)}"
+        }
+    if name == "get_weather_for_city":
+        return {"response": get_weather(args.get("city", ""))}
+    if name == "add_new_task":
+        return {"response": add_task(args.get("task", ""))}
+    if name == "list_all_tasks":
+        return {"response": list_tasks()}
+    if name == "clear_all_tasks":
+        return {"response": clear_tasks()}
+    return {"response": "I don't know how to do that."}
+
+def handle_command_ai(command):
+    if not GEMINI_API_KEY:
+        return {"response": "AI mode is not configured. Missing Gemini API key."}
+
+    try:
+        model = genai.GenerativeModel(
+            model_name="gemini-2.5-flash",
+            tools=[{"function_declarations": GEMINI_TOOLS}]
+        )
+        response = model.generate_content(command)
+
+        candidate = response.candidates[0]
+        for part in candidate.content.parts:
+            if part.function_call:
+                fn_name = part.function_call.name
+                fn_args = dict(part.function_call.args)
+                return execute_tool_call(fn_name, fn_args)
+
+        if candidate.content.parts and candidate.content.parts[0].text:
+            return {"response": candidate.content.parts[0].text.strip()}
+
+        return {"response": "I'm not sure how to respond to that."}
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return {"response": "AI mode had an error processing that."}
+
 def handle_command(command):
     command = command.lower().strip()
 
@@ -240,11 +337,15 @@ def stocks():
 def process_command():
     data = request.get_json()
     command = data.get("command", "")
+    ai_mode = data.get("ai_mode", False)
 
     if not command:
         return jsonify({"error": "No command provided"}), 400
 
-    result = handle_command(command)
+    if ai_mode:
+        result = handle_command_ai(command)
+    else:
+        result = handle_command(command)
     return jsonify(result)
 
 if __name__ == "__main__":
