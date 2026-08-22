@@ -223,7 +223,7 @@ def handle_command_ai(command):
 
     try:
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.6-flash",
             tools=[{"function_declarations": GEMINI_TOOLS}]
         )
         response = model.generate_content(command)
