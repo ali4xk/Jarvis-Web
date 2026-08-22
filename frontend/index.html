@@ -312,6 +312,16 @@
   }
   .demo-btn:hover { background: rgba(63,193,255,0.1); }
 
+  .ai-toggle {
+    border-color: rgba(180, 100, 255, 0.4);
+    color: #B464FF;
+  }
+  .ai-toggle:hover { background: rgba(180, 100, 255, 0.1); }
+  .ai-toggle.active {
+    background: rgba(180, 100, 255, 0.15);
+    box-shadow: 0 0 12px rgba(180, 100, 255, 0.4);
+  }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(63, 193, 255, 0.3); border-radius: 3px; }
@@ -366,6 +376,7 @@
       <div class="status-text" id="statusText">LISTENING</div>
       <canvas class="wave-canvas" id="wave"></canvas>
       <button class="demo-btn" id="listenBtn">ACTIVATE VOICE MODE</button>
+      <button class="demo-btn ai-toggle" id="aiModeBtn">AI MODE: OFF</button>
     </div>
 
     <div class="col">
@@ -432,6 +443,15 @@
       statusText.textContent = "LISTENING";
     }
   }
+
+  let aiMode = false;
+
+  document.getElementById("aiModeBtn").addEventListener("click", () => {
+    aiMode = !aiMode;
+    const btn = document.getElementById("aiModeBtn");
+    btn.textContent = aiMode ? "AI MODE: ON" : "AI MODE: OFF";
+    btn.classList.toggle("active", aiMode);
+  });
 
   document.getElementById("listenBtn").addEventListener("click", () => {
     enableAutoListen();
@@ -563,7 +583,7 @@
       const res = await fetch(BACKEND_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: commandText })
+        body: JSON.stringify({ command: commandText, ai_mode: aiMode })
       });
       const data = await res.json();
 
